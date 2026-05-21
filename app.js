@@ -1,4 +1,3 @@
-// PWA 서비스 워커 등록
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./app.js').catch(err => console.log(err));
@@ -7,9 +6,22 @@ if ('serviceWorker' in navigator) {
 
 const refreshBtn = document.getElementById('refresh-btn');
 const locationEl = document.getElementById('location');
-let savedWeatherData = null; 
+const tabButtons = document.querySelectorAll('.tab-btn');
 
-// 1. 현재 위치 가져오기 버튼 이벤트
+let savedWeatherData = null;
+let currentViewType = 'summary'; // 기본 뷰: 종합
+
+// 6대 기상 모델 정보 정의
+const models = [
+    { id: 'ecmwf_ifs_025', name: '🇪🇺 ECMWF' },
+    { id: 'gfs_seamless', name: '🇺🇸 GFS' },
+    { id: 'icon_seamless', name: '🇩🇪 ICON' },
+    { id: 'ukmo_ukv', name: '🇬🇧 UKMO' },
+    { id: 'kma_kim', name: '🇰🇷 KIM' },
+    { id: 'jma_msm', name: '🇯🇵 MSM' }
+];
+
+// 1. 위치 불러오기 버튼
 refreshBtn.addEventListener('click', () => {
     if (navigator.geolocation) {
         locationEl.innerText = "📍 현재 GPS 위치 찾는 중...";
@@ -22,95 +34,115 @@ refreshBtn.addEventListener('click', () => {
     }
 });
 
-// 2. 체크박스 변경 시 테이블만 다시 그리기 (한국, 일본 모델 ID 추가)
-const checkboxes = ['model-ecmwf', 'model-gfs', 'model-icon', 'model-ukmo', 'model-kim', 'model-msm'];
-checkboxes.forEach(id => {
-    document.getElementById(id).addEventListener('change', () => {
-        if (savedWeatherData) renderTable(savedWeatherData);
+// 2. 탭 전환 이벤트
+tabButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        
+        currentViewType = e.target.getAttribute('data-type');
+        if (savedWeatherData) renderMatrix(savedWeatherData);
     });
 });
 
-// 3. Open-Meteo API에서 6대 모델 예보 데이터 가져오기
+// 3. API 호출 (온도 및 강수량 동시 요청)
 async function fetchWeather(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
     locationEl.innerText = `위치: 위도 ${lat.toFixed(2)}, 경도 ${lon.toFixed(2)}`;
 
-    // 💡 한국 kma_kim, 일본 jma_msm 모델을 주소에 추가했습니다.
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&models=ecmwf_ifs_025,gfs_seamless,icon_seamless,ukmo_ukv,kma_kim,jma_msm`;
+    // hourly 파라미터에 temperature_2m와 precipitation 둘 다 추가
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation&models=ecmwf_ifs_025,gfs_seamless,icon_seamless,ukmo_ukv,kma_kim,jma_msm`;
 
     try {
         const response = await fetch(url);
         const data = await response.json();
-        savedWeatherData = data; 
-        renderTable(data);
+        savedWeatherData = data;
+        renderMatrix(data);
     } catch (error) {
         console.error(error);
         alert("기상 모델 데이터를 가져오는데 실패했습니다.");
     }
 }
 
-// 4. 데이터를 3시간 단위로 쪼개고 선택된 모델만 표로 그리기
-function renderTable(data) {
+// 4. 온도와 강수량을 조합하여 종합 이모지 판단하는 함수
+function getWeatherIcon(temp, rain) {
+    if (rain > 0.5) return { icon: '🌧️', text: '비' };
+    if (rain > 0.1) return { icon: '🌦️', text: '약한비' };
+    if (temp > 0) {
+        return { icon: '☀️', text: '맑음' };
+    } else {
+        return { icon: '❄️', text: '추위' };
+    }
+}
+
+// 5. 행=모델, 열=시간 매트릭스 렌더링
+function renderMatrix(data) {
     const headerRow = document.getElementById('table-header');
     const tableBody = document.getElementById('table-body');
     
-    headerRow.innerHTML = '<th>시간</th>';
+    headerRow.innerHTML = '<th class="sticky-col">모델 / 시간</th>';
     tableBody.innerHTML = '';
 
-    // 활성화된 모델 배열 매핑 (한국, 일본 추가)
-    const activeModels = [];
-    if (document.getElementById('model-ecmwf').checked) activeModels.push({ id: 'ecmwf_ifs_025', name: '🇪🇺 ECMWF' });
-    if (document.getElementById('model-gfs').checked) activeModels.push({ id: 'gfs_seamless', name: '🇺🇸 GFS' });
-    if (document.getElementById('model-icon').checked) activeModels.push({ id: 'icon_seamless', name: '🇩🇪 ICON' });
-    if (document.getElementById('model-ukmo').checked) activeModels.push({ id: 'ukmo_ukv', name: '🇬🇧 UKMO' });
-    if (document.getElementById('model-kim').checked) activeModels.push({ id: 'kma_kim', name: '🇰🇷 KIM' });
-    if (document.getElementById('model-msm').checked) activeModels.push({ id: 'jma_msm', name: '🇯🇵 MSM' });
+    const timeArray = data.hourly.time;
+    const targetIndices = [];
 
-    if (activeModels.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="empty-msg">선택된 기상 모델이 없습니다.</td></tr>';
-        return;
-    }
-
-    // 헤더 채우기
-    activeModels.forEach(model => {
-        const th = document.createElement('th');
-        th.innerText = model.name;
-        headerRow.appendChild(th);
-    });
-
-    const timeArray = data.hourly.time; 
-
-    // 향후 24시간 동안 3시간 간격으로 표시
+    // 향후 24시간 범위에서 3시간 단위의 인덱스 수집
     for (let i = 0; i < 24; i += 3) {
         if (!timeArray[i]) break;
+        targetIndices.push(i);
 
+        // 헤더 열에 시간 추가 (가로 축)
         const rawTime = timeArray[i];
         const day = rawTime.substring(8, 10);
         const hour = rawTime.substring(11, 13);
-        const timeText = `${day}일 ${hour}시`;
+        
+        const th = document.createElement('th');
+        th.innerText = `${day}일 ${hour}시`;
+        headerRow.appendChild(th);
+    }
 
+    // 각 기상 모델을 '행(Row)'으로 생성
+    models.forEach(model => {
         const tr = document.createElement('tr');
         
-        const timeTd = document.createElement('td');
-        timeTd.innerText = timeText;
-        timeTd.style.fontWeight = 'bold';
-        tr.appendChild(timeTd);
+        // 행의 첫 번째 칸: 모델 이름 고정 열
+        const modelTd = document.createElement('td');
+        modelTd.className = 'sticky-col';
+        modelTd.innerText = model.name;
+        tr.appendChild(modelTd);
 
-        // 선택된 각 모델별 데이터 매핑
-        activeModels.forEach(model => {
+        // 가로 시간 축을 돌면서 데이터 채우기
+        targetIndices.forEach(idx => {
             const td = document.createElement('td');
-            const tempValue = data.hourly[`temperature_2m_${model.id}`][i];
             
-            if (tempValue !== undefined && tempValue !== null) {
-                td.innerHTML = `<span class="temp-text">${tempValue}</span>°C`;
-            } else {
-                // 특정 모델에 해당 시간대 데이터가 아직 생성되지 않았을 때 예외 처리
-                td.innerText = '-'; 
+            const temp = data.hourly[`temperature_2m_${model.id}`][idx];
+            const rain = data.hourly[`precipitation_${model.id}`][idx];
+
+            if (temp === undefined || temp === null) {
+                td.innerText = '-';
+                tr.appendChild(td);
+                return;
             }
+
+            // 활성화된 탭 종류에 따라 다르게 렌더링
+            if (currentViewType === 'summary') {
+                const weather = getWeatherIcon(temp, rain);
+                td.innerHTML = `
+                    <div class="summary-cell">
+                        <span class="icon-emoji">${weather.icon}</span>
+                        <span class="sub-temp">${temp}°C</span>
+                    </div>
+                `;
+            } else if (currentViewType === 'temp') {
+                td.innerHTML = `<span class="text-temp">${temp}</span>°C`;
+            } else if (currentViewType === 'rain') {
+                td.innerHTML = `<span class="text-rain">${rain ?? 0}</span>mm`;
+            }
+
             tr.appendChild(td);
         });
 
         tableBody.appendChild(tr);
-    }
+    });
 }
