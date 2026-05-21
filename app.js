@@ -20,64 +20,94 @@ document.addEventListener('DOMContentLoaded', () => {
     marker.on('dragend', () => { const p = marker.getLatLng(); update(p.lat, p.lng); });
 
     async function fetchForecast(lat, lon) {
-        const tbody = document.getElementById('forecast-body'), thead = document.getElementById('forecast-header');
-        tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;">데이터 로딩 중...</td></tr>';
+        const tbody = document.getElementById('forecast-body');
+        const thead = document.getElementById('forecast-header');
         
         try {
-            // 💡 API에 &daily=sunrise,sunset 추가!
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation&daily=sunrise,sunset&models=${models.map(m=>m.id).join(',')}&forecast_days=7&timezone=auto`);
+            thead.innerHTML = '<tr><th class="sticky-col">날짜</th>' + models.map(m=>`<th>${m.name}</th>`).join('') + '</tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;">데이터 로딩 중...</td></tr>';
+            
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation&daily=sunrise,sunset&models=${models.map(m=>m.id).join(',')}&forecast_days=7&timezone=auto`;
+            const res = await fetch(url);
             const data = await res.json();
             
-            if (data.error) { tbody.innerHTML = `<tr><td colspan="7">에러: ${data.reason}</td></tr>`; return; }
+            if (data.error) {
+                tbody.innerHTML = `<tr><td colspan="7">API 에러: ${data.reason}</td></tr>`;
+                return;
+            }
 
-            thead.innerHTML = '<tr><th class="sticky-col">날짜</th>' + models.map(m=>`<th>${m.name}</th>`).join('') + '</tr>';
             tbody.innerHTML = '';
             
+            // 💡 과부하 방지: 3시간 간격(0, 3, 6, 9시...) 데이터만 렌더링하도록 필터링
             const groups = {};
-            data.hourly.time.forEach((t, i) => { const d = t.split('T')[0]; if(!groups[d]) groups[d]=[]; groups[d].push(i); });
+            data.hourly.time.forEach((t, i) => { 
+                const hourStr = t.substring(11,13);
+                if (parseInt(hourStr) % 3 === 0) { // 3시간 단위만 추출
+                    const d = t.split('T')[0]; 
+                    if(!groups[d]) groups[d]=[]; 
+                    groups[d].push(i); 
+                }
+            });
             
             Object.keys(groups).forEach(date => {
-                // 💡 일출 일몰 시간 추출 로직
-                const dailyIdx = data.daily.time.indexOf(date);
                 let sunHtml = "";
-                if (dailyIdx !== -1) {
-                    // 극지방 백야/극야 현상으로 데이터가 null일 수 있으므로 예외 처리
-                    const sunrise = data.daily.sunrise[dailyIdx] ? data.daily.sunrise[dailyIdx].split('T')[1] : '--:--';
-                    const sunset = data.daily.sunset[dailyIdx] ? data.daily.sunset[dailyIdx].split('T')[1] : '--:--';
-                    sunHtml = `<div style="font-size:0.6rem; font-weight:normal; color:#1565c0; margin-top:3px; line-height:1.2;">🌅${sunrise}<br>🌇${sunset}</div>`;
+                // 💡 안전한 일출/일몰 추출
+                if (data.daily && data.daily.time && data.daily.sunrise && data.daily.sunset) {
+                    const dailyIdx = data.daily.time.indexOf(date);
+                    if (dailyIdx !== -1) {
+                        const sr = data.daily.sunrise[dailyIdx];
+                        const ss = data.daily.sunset[dailyIdx];
+                        const sunrise = sr ? sr.split('T')[1] : '--:--';
+                        const sunset = ss ? ss.split('T')[1] : '--:--';
+                        sunHtml = `<div style="font-size:0.6rem; color:#1565c0; margin-top:3px; font-weight:normal;">🌅${sunrise}<br>🌇${sunset}</div>`;
+                    }
                 }
 
-                const tr = document.createElement('tr'); tr.className = 'daily-row';
-                // 날짜 밑에 sunHtml(일출/일몰) 삽입
-                tr.innerHTML = `<td class="sticky-col">${date.substring(5,7)}/${date.substring(8,10)} ▼${sunHtml}</td>` + models.map(m => {
-                    let tempsArr = data.hourly['temperature_2m_'+m.id];
-                    if(!tempsArr) return '<td>-</td>';
-                    let maxT = Math.max(...groups[date].map(i => tempsArr[i]).filter(v => v!=null));
-                    return `<td>${maxT !== -Infinity ? Math.round(maxT)+'°' : '-'}</td>`;
-                }).join('');
+                const tr = document.createElement('tr'); 
+                tr.className = 'daily-row';
+                
+                let rowHtml = `<td class="sticky-col">${date.substring(5,7)}/${date.substring(8,10)} ▼${sunHtml}</td>`;
+                
+                models.forEach(m => {
+                    let tempArr = data.hourly['temperature_2m_'+m.id];
+                    if (!tempArr) {
+                        rowHtml += '<td>-</td>';
+                    } else {
+                        let validTemps = groups[date].map(i => tempArr[i]).filter(v => v !== null && v !== undefined);
+                        rowHtml += `<td>${validTemps.length > 0 ? Math.round(Math.max(...validTemps))+'°' : '-'}</td>`;
+                    }
+                });
+                
+                tr.innerHTML = rowHtml;
                 tbody.appendChild(tr);
                 
                 groups[date].forEach(idx => {
-                    const trH = document.createElement('tr'); trH.className = 'hourly-row group-' + date;
-                    let html = `<td class="sticky-col">└ ${data.hourly.time[idx].substring(11,13)}시</td>`;
+                    const trH = document.createElement('tr'); 
+                    trH.className = 'hourly-row group-' + date;
+                    let hHtml = `<td class="sticky-col">└ ${data.hourly.time[idx].substring(11,13)}시</td>`;
                     
                     models.forEach(m => {
-                        let tempArr = data.hourly['temperature_2m_'+m.id];
-                        let rainArr = data.hourly['precipitation_'+m.id];
-                        let temp = tempArr ? tempArr[idx] : null;
-                        let rain = rainArr ? rainArr[idx] : null;
+                        let tArr = data.hourly['temperature_2m_'+m.id];
+                        let rArr = data.hourly['precipitation_'+m.id];
+                        let temp = tArr ? tArr[idx] : null;
+                        let rain = rArr ? rArr[idx] : null;
                         
-                        let cellText = temp != null ? Math.round(temp)+'°' : '-';
-                        if(rain > 0) cellText += `<br><span style="color:#1e90ff; font-size:0.7rem;">${rain}mm</span>`;
-                        html += `<td>${cellText}</td>`;
+                        let cellTxt = (temp !== null && temp !== undefined) ? Math.round(temp)+'°' : '-';
+                        if (rain > 0) cellTxt += `<br><span style="color:#1e90ff; font-size:0.7rem;">${rain}mm</span>`;
+                        hHtml += `<td>${cellTxt}</td>`;
                     });
                     
-                    trH.innerHTML = html;
+                    trH.innerHTML = hHtml;
                     tbody.appendChild(trH);
                 });
                 tr.onclick = () => document.querySelectorAll('.group-'+date).forEach(r => r.classList.toggle('show'));
             });
-        } catch (e) { tbody.innerHTML = '<tr><td colspan="7">데이터를 가져올 수 없습니다.</td></tr>'; }
+            
+        } catch (e) {
+            // 💡 에러가 발생하면 하얀 화면 대신 표 안에 빨간색으로 에러 원인을 띄워줍니다!
+            tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:left; padding:15px; font-weight:bold;">오류 발생: ${e.message}</td></tr>`;
+            console.error(e);
+        }
     }
 
     async function fetchHistory(lat, lon) {
