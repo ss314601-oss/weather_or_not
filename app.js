@@ -3,11 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     let marker = L.marker([37.5665, 126.9780], {draggable: true}).addTo(map);
     
-    // 💡 노르웨이 모델 키값 수정 (metno_seamless)
     const models = [
         { id: 'ecmwf_ifs', name: 'ECMWF' }, { id: 'gfs_seamless', name: 'GFS' },
         { id: 'icon_seamless', name: 'ICON' }, { id: 'jma_seamless', name: 'JMA' },
-        { id: 'kma_seamless', name: 'KMA' }, { id: 'metno_seamless', name: 'MET' } 
+        { id: 'kma_seamless', name: 'KMA' }, { id: 'metno_seamless', name: 'MET' }
     ];
 
     async function update(lat, lon, name = "지도 선택 위치") {
@@ -22,17 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchForecast(lat, lon) {
         const tbody = document.getElementById('forecast-body'), thead = document.getElementById('forecast-header');
-        tbody.innerHTML = '<tr><td colspan="7">데이터 로딩 중...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="padding:20px;">데이터 로딩 중...</td></tr>';
         
         try {
-            // 💡 강수량(precipitation) 추가 및 오류 처리
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation&models=${models.map(m=>m.id).join(',')}&forecast_days=7&timezone=auto`);
+            // 💡 API에 &daily=sunrise,sunset 추가!
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation&daily=sunrise,sunset&models=${models.map(m=>m.id).join(',')}&forecast_days=7&timezone=auto`);
             const data = await res.json();
             
-            if (data.error) {
-                tbody.innerHTML = `<tr><td colspan="7">API 에러: ${data.reason}</td></tr>`;
-                return;
-            }
+            if (data.error) { tbody.innerHTML = `<tr><td colspan="7">에러: ${data.reason}</td></tr>`; return; }
 
             thead.innerHTML = '<tr><th class="sticky-col">날짜</th>' + models.map(m=>`<th>${m.name}</th>`).join('') + '</tr>';
             tbody.innerHTML = '';
@@ -41,8 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
             data.hourly.time.forEach((t, i) => { const d = t.split('T')[0]; if(!groups[d]) groups[d]=[]; groups[d].push(i); });
             
             Object.keys(groups).forEach(date => {
+                // 💡 일출 일몰 시간 추출 로직
+                const dailyIdx = data.daily.time.indexOf(date);
+                let sunHtml = "";
+                if (dailyIdx !== -1) {
+                    // 극지방 백야/극야 현상으로 데이터가 null일 수 있으므로 예외 처리
+                    const sunrise = data.daily.sunrise[dailyIdx] ? data.daily.sunrise[dailyIdx].split('T')[1] : '--:--';
+                    const sunset = data.daily.sunset[dailyIdx] ? data.daily.sunset[dailyIdx].split('T')[1] : '--:--';
+                    sunHtml = `<div style="font-size:0.6rem; font-weight:normal; color:#1565c0; margin-top:3px; line-height:1.2;">🌅${sunrise}<br>🌇${sunset}</div>`;
+                }
+
                 const tr = document.createElement('tr'); tr.className = 'daily-row';
-                tr.innerHTML = `<td class="sticky-col">${date.substring(5)} ▼</td>` + models.map(m => {
+                // 날짜 밑에 sunHtml(일출/일몰) 삽입
+                tr.innerHTML = `<td class="sticky-col">${date.substring(5,7)}/${date.substring(8,10)} ▼${sunHtml}</td>` + models.map(m => {
                     let tempsArr = data.hourly['temperature_2m_'+m.id];
                     if(!tempsArr) return '<td>-</td>';
                     let maxT = Math.max(...groups[date].map(i => tempsArr[i]).filter(v => v!=null));
@@ -52,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 groups[date].forEach(idx => {
                     const trH = document.createElement('tr'); trH.className = 'hourly-row group-' + date;
-                    let html = `<td class="sticky-col">${data.hourly.time[idx].substring(11,13)}시</td>`;
+                    let html = `<td class="sticky-col">└ ${data.hourly.time[idx].substring(11,13)}시</td>`;
                     
                     models.forEach(m => {
                         let tempArr = data.hourly['temperature_2m_'+m.id];
@@ -70,9 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 tr.onclick = () => document.querySelectorAll('.group-'+date).forEach(r => r.classList.toggle('show'));
             });
-        } catch (e) {
-            tbody.innerHTML = '<tr><td colspan="7">예보 데이터를 가져올 수 없습니다.</td></tr>';
-        }
+        } catch (e) { tbody.innerHTML = '<tr><td colspan="7">데이터를 가져올 수 없습니다.</td></tr>'; }
     }
 
     async function fetchHistory(lat, lon) {
@@ -88,15 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
             data.daily.time.forEach((date, i) => {
                 const tr = document.createElement('tr'); if(date === d) tr.className = 'target-date-row';
                 let rain = data.daily.precipitation_sum[i];
-                tr.innerHTML = `<td class="sticky-col">${date.substring(5)}</td>
+                tr.innerHTML = `<td class="sticky-col">${date.substring(5,7)}/${date.substring(8,10)}</td>
                                 <td style="color:#d32f2f;">${Math.round(data.daily.temperature_2m_max[i])}°</td>
                                 <td style="color:#1976d2;">${Math.round(data.daily.temperature_2m_min[i])}°</td>
                                 <td>${rain > 5 ? '🌧️' : (rain > 0 ? '🌦️' : '☀️')} ${rain > 0 ? rain+'mm' : ''}</td>`;
                 tbody.appendChild(tr);
             });
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     document.getElementById('search-btn').onclick = async () => {
