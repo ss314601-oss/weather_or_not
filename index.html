@@ -26,17 +26,13 @@
 
         <!-- 메인 메뉴 탭 (예보 vs 과거) -->
         <div class="main-tabs">
-            <button class="main-tab-btn active" data-target="forecast-section">🔮 기상 모델 예보</button>
-            <button class="main-tab-btn" data-target="history-section">📜 1~2년 전 과거 날씨</button>
+            <button class="main-tab-btn active" data-target="forecast-section">🔮 주간 기상 모델 예보</button>
+            <button class="main-tab-btn" data-target="history-section">📜 과거 실제 날씨</button>
         </div>
 
-        <!-- 1. 예보 섹션 (기존 모델 비교) -->
+        <!-- 1. 예보 섹션 (일별 요약 -> 3시간 상세 펼침) -->
         <div id="forecast-section" class="content-section active">
-            <div class="sub-tabs">
-                <button class="sub-tab-btn active" data-type="summary">종합(날씨)</button>
-                <button class="sub-tab-btn" data-type="temp">온도</button>
-                <button class="sub-tab-btn" data-type="rain">강수량</button>
-            </div>
+            <p class="section-desc">날짜를 터치하면 3시간 단위 상세 예보가 펼쳐집니다.</p>
             <div class="table-wrapper">
                 <table id="forecast-matrix">
                     <thead id="forecast-header"></thead>
@@ -45,12 +41,23 @@
             </div>
         </div>
 
-        <!-- 2. 과거 날씨 섹션 (신규) -->
+        <!-- 2. 과거 날씨 섹션 (전후 1달) -->
         <div id="history-section" class="content-section">
-            <p class="section-desc">선택하신 지역의 정확히 1년 전, 2년 전 오늘 날씨입니다.</p>
+            <div class="history-controls">
+                <input type="date" id="history-date">
+                <button id="history-search-btn">이 날짜 주변 한 달 조회</button>
+            </div>
+            <p class="section-desc">지정한 날짜 전후 15일(총 31일)의 실제 기록입니다.<br><span class="highlight-text">노란색 줄</span>이 선택하신 날짜입니다.</p>
             <div class="table-wrapper">
                 <table id="history-matrix">
-                    <thead id="history-header"></thead>
+                    <thead id="history-header">
+                        <tr>
+                            <th class="sticky-col">날짜</th>
+                            <th>최고 기온</th>
+                            <th>최저 기온</th>
+                            <th>강수량</th>
+                        </tr>
+                    </thead>
                     <tbody id="history-body"></tbody>
                 </table>
             </div>
