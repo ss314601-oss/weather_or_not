@@ -1,0 +1,21 @@
+{
+  "name": "매일 날씨 PWA 앱",
+  "short_name": "매일날씨",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0984e3",
+  "theme_color": "#0984e3",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://via.placeholder.com/512",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
