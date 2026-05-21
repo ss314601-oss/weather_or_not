@@ -2,37 +2,29 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 기상 예보 & 과거 비교</title>
-    <!-- Leaflet 지도 CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>날씨 비교 앱</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div class="app-container">
-        
-        <!-- 상단 고정: 지도 및 검색 영역 -->
         <div class="header-section">
             <div class="search-box">
-                <input type="text" id="search-input" placeholder="도시 이름 검색 (예: 서울, 파리)">
-                <button id="search-btn">🔍 검색</button>
-                <button id="gps-btn">📍 내 위치</button>
+                <input type="text" id="search-input" placeholder="도시 검색">
+                <button id="search-btn">🔍</button>
+                <button id="gps-btn">📍</button>
             </div>
-            <!-- 지도가 표시될 네모 공간 -->
             <div id="map"></div>
-            <p id="location-text">위치: 서울 (기본값)</p>
+            <p id="location-text">위치: 서울</p>
         </div>
 
-        <!-- 메인 메뉴 탭 (예보 vs 과거) -->
         <div class="main-tabs">
-            <button class="main-tab-btn active" data-target="forecast-section">🔮 주간 기상 모델 예보</button>
-            <button class="main-tab-btn" data-target="history-section">📜 과거 실제 날씨</button>
+            <button class="main-tab-btn active" data-target="forecast-section">🔮 주간 예보</button>
+            <button class="main-tab-btn" data-target="history-section">📜 과거 기록</button>
         </div>
 
-        <!-- 1. 예보 섹션 (일별 요약 -> 3시간 상세 펼침) -->
         <div id="forecast-section" class="content-section active">
-            <p class="section-desc">날짜를 터치하면 3시간 단위 상세 예보가 펼쳐집니다.</p>
             <div class="table-wrapper">
                 <table id="forecast-matrix">
                     <thead id="forecast-header"></thead>
@@ -41,31 +33,19 @@
             </div>
         </div>
 
-        <!-- 2. 과거 날씨 섹션 (전후 1달) -->
         <div id="history-section" class="content-section">
             <div class="history-controls">
                 <input type="date" id="history-date">
-                <button id="history-search-btn">이 날짜 주변 한 달 조회</button>
+                <button id="history-search-btn">조회</button>
             </div>
-            <p class="section-desc">지정한 날짜 전후 15일(총 31일)의 실제 기록입니다.<br><span class="highlight-text">노란색 줄</span>이 선택하신 날짜입니다.</p>
             <div class="table-wrapper">
                 <table id="history-matrix">
-                    <thead id="history-header">
-                        <tr>
-                            <th class="sticky-col">날짜</th>
-                            <th>최고 기온</th>
-                            <th>최저 기온</th>
-                            <th>강수량</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th class="sticky-col">날짜</th><th>최고</th><th>최저</th><th>강수</th></tr></thead>
                     <tbody id="history-body"></tbody>
                 </table>
             </div>
         </div>
-
     </div>
-
-    <!-- Leaflet 지도 JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="app.js"></script>
 </body>
