@@ -3,39 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>기상모델 비교 예보</title>
+    <title>멀티 기상모델 비교 맵</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div class="app-container">
-        <h1>📊 기상 모델별 비교 예보</h1>
+        <h1>📊 멀티 기상모델 비교 예보</h1>
         <p id="location">위치 정보를 가져와 주세요.</p>
         
-        <button id="refresh-btn">📍 현재 위치 예보 불러오기</button>
+        <button id="refresh-btn">📍 현재 위치 예보 보기</button>
 
-        <div class="model-selector">
-            <h3>비교할 모델 선택</h3>
-            <div class="checkbox-group">
-                <label><input type="checkbox" id="model-ecmwf" checked> 🇪🇺 ECMWF</label>
-                <label><input type="checkbox" id="model-gfs" checked> 🇺🇸 GFS</label>
-                <label><input type="checkbox" id="model-icon" checked> 🇩🇪 ICON</label>
-                <label><input type="checkbox" id="model-ukmo" checked> 🇬🇧 UKMO</label>
-                <label><input type="checkbox" id="model-kim" checked> 🇰🇷 KIM (한국)</label>
-                <label><input type="checkbox" id="model-msm" checked> 🇯🇵 MSM (일본)</label>
-            </div>
+        <!-- 상단 데이터 타입 선택 탭 -->
+        <div class="tab-container">
+            <button class="tab-btn active" data-type="summary">종합 (날씨)</button>
+            <button class="tab-btn" data-type="temp">온도 (°C)</button>
+            <button class="tab-btn" data-type="rain">강수량 (mm)</button>
         </div>
 
-        <div class="table-container">
-            <table id="weather-table">
+        <!-- 결과 매트릭스 테이블 (가로 스크롤) -->
+        <div class="table-wrapper">
+            <table id="weather-matrix">
                 <thead>
                     <tr id="table-header">
-                        <th>시간</th>
-                        </tr>
+                        <th class="sticky-col">모델 / 시간</th>
+                        <!-- 자바스크립트에서 3시간 단위 시간이 가로로 배치됩니다 -->
+                    </tr>
                 </thead>
                 <tbody id="table-body">
                     <tr>
-                        <td colspan="7" class="empty-msg">위치 버튼을 누르면 3시간 단위 예보가 표시됩니다.</td>
+                        <td class="empty-msg">위치 버튼을 누르면 비교 매트릭스가 표시됩니다.</td>
                     </tr>
                 </tbody>
             </table>
