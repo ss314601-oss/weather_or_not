@@ -3,53 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>멀티 기상모델 비교 맵</title>
+    <title>스마트 기상 예보 & 과거 비교</title>
+    <!-- Leaflet 지도 CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div class="app-container">
-        <h1>📊 멀티 기상모델 비교 예보</h1>
-        <p id="location">원하시는 위치를 선택해 주세요.</p>
         
-        <!-- 위치 제어 영역 -->
-        <div class="location-controls">
-            <select id="city-select">
-                <option value="">🌍 전 세계 주요 도시 선택하기</option>
-                <option value="37.5665,126.9780">🇰🇷 서울 (대한민국)</option>
-                <option value="35.6895,139.6917">🇯🇵 도쿄 (일본)</option>
-                <option value="40.7128,-74.0060">🇺🇸 뉴욕 (미국)</option>
-                <option value="51.5074,-0.1278">🇬🇧 런던 (영국)</option>
-                <option value="48.8566,2.3522">🇫🇷 파리 (프랑스)</option>
-                <option value="-33.8688,151.2093">🇦🇺 시드니 (호주)</option>
-            </select>
-            <button id="refresh-btn">📍 내 현재 GPS 위치로 보기</button>
+        <!-- 상단 고정: 지도 및 검색 영역 -->
+        <div class="header-section">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="도시 이름 검색 (예: 서울, 파리)">
+                <button id="search-btn">🔍 검색</button>
+                <button id="gps-btn">📍 내 위치</button>
+            </div>
+            <!-- 지도가 표시될 네모 공간 -->
+            <div id="map"></div>
+            <p id="location-text">위치: 서울 (기본값)</p>
         </div>
 
-        <!-- 상단 데이터 타입 선택 탭 -->
-        <div class="tab-container">
-            <button class="tab-btn active" data-type="summary">종합 (날씨)</button>
-            <button class="tab-btn" data-type="temp">온도 (°C)</button>
-            <button class="tab-btn" data-type="rain">강수량 (mm)</button>
+        <!-- 메인 메뉴 탭 (예보 vs 과거) -->
+        <div class="main-tabs">
+            <button class="main-tab-btn active" data-target="forecast-section">🔮 기상 모델 예보</button>
+            <button class="main-tab-btn" data-target="history-section">📜 1~2년 전 과거 날씨</button>
         </div>
 
-        <!-- 결과 매트릭스 테이블 (가로 스크롤) -->
-        <div class="table-wrapper">
-            <table id="weather-matrix">
-                <thead>
-                    <tr id="table-header">
-                        <th class="sticky-col">모델 / 시간</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <tr>
-                        <td class="empty-msg">도시를 선택하거나 위치 버튼을 눌러주세요.</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- 1. 예보 섹션 (기존 모델 비교) -->
+        <div id="forecast-section" class="content-section active">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" data-type="summary">종합(날씨)</button>
+                <button class="sub-tab-btn" data-type="temp">온도</button>
+                <button class="sub-tab-btn" data-type="rain">강수량</button>
+            </div>
+            <div class="table-wrapper">
+                <table id="forecast-matrix">
+                    <thead id="forecast-header"></thead>
+                    <tbody id="forecast-body"></tbody>
+                </table>
+            </div>
         </div>
+
+        <!-- 2. 과거 날씨 섹션 (신규) -->
+        <div id="history-section" class="content-section">
+            <p class="section-desc">선택하신 지역의 정확히 1년 전, 2년 전 오늘 날씨입니다.</p>
+            <div class="table-wrapper">
+                <table id="history-matrix">
+                    <thead id="history-header"></thead>
+                    <tbody id="history-body"></tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
+    <!-- Leaflet 지도 JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
