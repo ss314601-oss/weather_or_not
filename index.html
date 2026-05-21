@@ -10,9 +10,21 @@
 <body>
     <div class="app-container">
         <h1>📊 멀티 기상모델 비교 예보</h1>
-        <p id="location">위치 정보를 가져와 주세요.</p>
+        <p id="location">원하시는 위치를 선택해 주세요.</p>
         
-        <button id="refresh-btn">📍 현재 위치 예보 보기</button>
+        <!-- 위치 제어 영역 -->
+        <div class="location-controls">
+            <select id="city-select">
+                <option value="">🌍 전 세계 주요 도시 선택하기</option>
+                <option value="37.5665,126.9780">🇰🇷 서울 (대한민국)</option>
+                <option value="35.6895,139.6917">🇯🇵 도쿄 (일본)</option>
+                <option value="40.7128,-74.0060">🇺🇸 뉴욕 (미국)</option>
+                <option value="51.5074,-0.1278">🇬🇧 런던 (영국)</option>
+                <option value="48.8566,2.3522">🇫🇷 파리 (프랑스)</option>
+                <option value="-33.8688,151.2093">🇦🇺 시드니 (호주)</option>
+            </select>
+            <button id="refresh-btn">📍 내 현재 GPS 위치로 보기</button>
+        </div>
 
         <!-- 상단 데이터 타입 선택 탭 -->
         <div class="tab-container">
@@ -27,12 +39,11 @@
                 <thead>
                     <tr id="table-header">
                         <th class="sticky-col">모델 / 시간</th>
-                        <!-- 자바스크립트에서 3시간 단위 시간이 가로로 배치됩니다 -->
                     </tr>
                 </thead>
                 <tbody id="table-body">
                     <tr>
-                        <td class="empty-msg">위치 버튼을 누르면 비교 매트릭스가 표시됩니다.</td>
+                        <td class="empty-msg">도시를 선택하거나 위치 버튼을 눌러주세요.</td>
                     </tr>
                 </tbody>
             </table>
