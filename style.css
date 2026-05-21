@@ -1,61 +1,29 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; }
-body { background: #f1f2f6; color: #2f3542; display: flex; justify-content: center; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; overflow-x: hidden; font-family: sans-serif; }
+.app-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-.app-container { width: 100%; max-width: 800px; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+.header-section { background: #fff; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+#map { width: 100%; height: 120px; border-radius: 8px; margin-bottom: 5px; }
+.search-box { display: flex; gap: 5px; }
+#search-input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
 
-/* 상단 고정 영역 (지도+검색) */
-.header-section { position: sticky; top: 0; background: white; padding: 15px; z-index: 999; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-.search-box { display: flex; gap: 5px; margin-bottom: 10px; }
-#search-input { flex: 1; padding: 10px; border: 1px solid #ced6e0; border-radius: 6px; font-size: 0.95rem; }
-#search-btn, #gps-btn { background: #2f3542; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-#search-btn:active, #gps-btn:active { background: #57606f; }
+.main-tabs { display: flex; background: #fff; border-bottom: 1px solid #ccc; }
+.main-tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; color: #aaa; }
+.main-tab-btn.active { color: #1e90ff; border-bottom: 2px solid #1e90ff; }
 
-/* 지도 크기 */
-#map { width: 100%; height: 180px; border-radius: 8px; border: 1px solid #ced6e0; z-index: 1; margin-bottom: 8px; }
-#location-text { text-align: center; font-size: 0.85rem; color: #747d8c; font-weight: bold; }
+.content-section { display: none; padding: 10px; flex: 1; overflow: hidden; }
+.content-section.active { display: flex; flex-direction: column; }
+.table-wrapper { flex: 1; overflow: auto; border: 1px solid #ccc; background: white; -webkit-overflow-scrolling: touch; }
 
-/* 메인 탭 */
-.main-tabs { display: flex; padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ced6e0; }
-.main-tab-btn { flex: 1; background: none; border: none; padding: 12px 0; font-size: 1rem; font-weight: bold; color: #a4b0be; cursor: pointer; border-bottom: 3px solid transparent; }
-.main-tab-btn.active { color: #1e90ff; border-bottom: 3px solid #1e90ff; }
+table { border-collapse: separate; border-spacing: 0; width: 100%; table-layout: fixed; font-size: 0.75rem; }
+th, td { padding: 8px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; text-align: center; }
+thead th { position: sticky; top: 0; background: #eee; z-index: 10; }
+.sticky-col { position: sticky; left: 0; background: #fff; z-index: 5; border-right: 2px solid #ccc; width: 60px; }
 
-/* 과거조회 컨트롤 */
-.history-controls { display: flex; gap: 8px; margin-bottom: 10px; }
-#history-date { flex: 1; padding: 10px; border: 1px solid #ced6e0; border-radius: 6px; font-family: inherit; }
-#history-search-btn { background: #1e90ff; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.history-controls { display: flex; gap: 5px; margin-bottom: 10px; }
+#history-date { flex: 1; padding: 8px; }
 
-/* 섹션 표시/숨김 */
-.content-section { display: none; padding: 15px; }
-.content-section.active { display: block; }
-.section-desc { font-size: 0.85rem; color: #747d8c; margin-bottom: 15px; text-align: center; }
-.highlight-text { font-weight: bold; color: #ffa502; }
-
-/* 가로 스크롤 테이블 */
-.table-wrapper { width: 100%; overflow-x: auto; border: 1px solid #ced6e0; border-radius: 8px; }
-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
-th, td { padding: 10px; text-align: center; border-right: 1px solid #e4e7eb; border-bottom: 1px solid #e4e7eb; min-width: 70px; }
-.sticky-col { position: sticky; left: 0; background: #f1f2f6; font-weight: bold; z-index: 2; border-right: 2px solid #ced6e0; }
-th.sticky-col { background: #e4e7eb; z-index: 3;}
-thead th { background: #e4e7eb; position: sticky; top: 0; z-index: 2; }
-
-/* 아코디언(일별 요약 / 3시간 상세) 스타일 */
-.daily-row { cursor: pointer; background: #ffffff; transition: background 0.2s; }
-.daily-row:hover { background: #f6f8f9; }
-.daily-row .sticky-col { background: #ffffff; color: #2f3542; font-size: 0.9rem; }
-.daily-row:hover .sticky-col { background: #f6f8f9; }
-.toggle-icon { font-size: 0.7rem; color: #a4b0be; margin-left: 5px; }
-
-/* 숨겨진 3시간 단위 행 */
-.hourly-row { display: none; background: #f8f9fa; font-size: 0.8rem; }
+.daily-row { cursor: pointer; font-weight: bold; background: #f9f9f9; }
+.hourly-row { display: none; background: #fff; }
 .hourly-row.show { display: table-row; }
-.hourly-row .sticky-col { background: #f8f9fa; font-weight: normal; color: #57606f; padding-left: 15px; text-align: left; }
-.hourly-row td { color: #57606f; border-bottom: 1px dashed #e4e7eb; }
-
-/* 날씨 데이터 셀 디자인 */
-.cell-data { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.temp-text { font-weight: bold; }
-.rain-text { font-size: 0.75rem; color: #1e90ff; }
-
-/* 과거 기록 타겟 날짜 하이라이트 */
 .target-date-row td { background: #fff8e7; font-weight: bold; }
-.target-date-row .sticky-col { background: #fff8e7; color: #d35400; }
