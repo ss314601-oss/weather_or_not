@@ -1,164 +1,46 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Apple SD Gothic Neo', sans-serif;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; }
+body { background: #f1f2f6; color: #2f3542; display: flex; justify-content: center; }
 
-body {
-    background: #f1f2f6;
-    color: #2f3542;
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-}
+.app-container { width: 100%; max-width: 800px; background: white; min-height: 100vh; display: flex; flex-direction: column; }
 
-.app-container {
-    width: 100%;
-    max-width: 800px;
-    background: white;
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
+/* 상단 고정 영역 (지도+검색) */
+.header-section { position: sticky; top: 0; background: white; padding: 15px; z-index: 999; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.search-box { display: flex; gap: 5px; margin-bottom: 10px; }
+#search-input { flex: 1; padding: 10px; border: 1px solid #ced6e0; border-radius: 6px; font-size: 0.95rem; }
+#search-btn, #gps-btn { background: #2f3542; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+#search-btn:active, #gps-btn:active { background: #57606f; }
 
-h1 {
-    font-size: 1.2rem;
-    text-align: center;
-    margin-bottom: 5px;
-}
+/* 지도 크기 */
+#map { width: 100%; height: 180px; border-radius: 8px; border: 1px solid #ced6e0; z-index: 1; margin-bottom: 8px; }
+#location-text { text-align: center; font-size: 0.85rem; color: #747d8c; font-weight: bold; }
 
-#location {
-    text-align: center;
-    font-size: 0.85rem;
-    color: #747d8c;
-    margin-bottom: 15px;
-}
+/* 메인 탭 (예보/과거) */
+.main-tabs { display: flex; padding: 10px 15px; background: #f8f9fa; border-bottom: 1px solid #ced6e0; }
+.main-tab-btn { flex: 1; background: none; border: none; padding: 12px 0; font-size: 1rem; font-weight: bold; color: #a4b0be; cursor: pointer; border-bottom: 3px solid transparent; }
+.main-tab-btn.active { color: #1e90ff; border-bottom: 3px solid #1e90ff; }
 
-/* 위치 제어 영역 (드롭다운 + 버튼) */
-.location-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 15px;
-}
+/* 섹션 표시/숨김 */
+.content-section { display: none; padding: 15px; }
+.content-section.active { display: block; }
 
-select {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ced6e0;
-    font-size: 0.95rem;
-    color: #2f3542;
-    background-color: #f8f9fa;
-    cursor: pointer;
-    outline: none;
-}
+/* 서브 탭 (온도/강수량 등) */
+.sub-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+.sub-tab-btn { flex: 1; background: #e4e7eb; color: #57606f; border: none; padding: 8px 0; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+.sub-tab-btn.active { background: #2f3542; color: white; }
 
-#refresh-btn {
-    width: 100%;
-    background: #2f3542;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: bold;
-    cursor: pointer;
-}
+.section-desc { font-size: 0.85rem; color: #747d8c; margin-bottom: 10px; text-align: center; }
 
-/* 상단 탭 스타일 */
-.tab-container {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 15px;
-}
+/* 가로 스크롤 테이블 */
+.table-wrapper { width: 100%; overflow-x: auto; border: 1px solid #ced6e0; border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; white-space: nowrap; }
+th, td { padding: 12px 15px; text-align: center; border-right: 1px solid #e4e7eb; border-bottom: 1px solid #e4e7eb; min-width: 85px; }
+.sticky-col { position: sticky; left: 0; background: #f1f2f6; font-weight: bold; z-index: 2; border-right: 2px solid #ced6e0; }
+th.sticky-col { background: #e4e7eb; }
+tr:hover td { background: #f6f8f9; }
+tr:hover td.sticky-col { background: #e4e7eb; }
 
-.tab-btn {
-    flex: 1;
-    background: #e4e7eb;
-    color: #57606f;
-    border: none;
-    padding: 10px 0;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.tab-btn.active {
-    background: #1e90ff;
-    color: white;
-}
-
-/* 횡스크롤 고정 테이블 디자인 */
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    border: 1px solid #ced6e0;
-    border-radius: 8px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.8rem;
-    white-space: nowrap; 
-}
-
-th, td {
-    padding: 12px 15px;
-    text-align: center;
-    border-right: 1px solid #e4e7eb;
-    border-bottom: 1px solid #e4e7eb;
-    min-width: 85px; 
-}
-
-.sticky-col {
-    position: sticky;
-    left: 0;
-    background: #f1f2f6;
-    font-weight: bold;
-    z-index: 2;
-    min-width: 100px;
-    border-right: 2px solid #ced6e0;
-}
-
-th.sticky-col {
-    background: #e4e7eb;
-}
-
-tr:hover td {
-    background: #f6f8f9;
-}
-
-tr:hover td.sticky-col {
-    background: #e4e7eb;
-}
-
-.empty-msg {
-    padding: 40px 0;
-    color: #a4b0be;
-    text-align: center;
-    width: 100%;
-}
-
-/* 종합 날씨 이모지 및 텍스트 박스 */
-.summary-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-.icon-emoji {
-    font-size: 1.2rem;
-}
-.sub-temp {
-    font-size: 0.7rem;
-    color: #747d8c;
-}
-
-/* 데이터별 강조 컬러 */
+.summary-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.icon-emoji { font-size: 1.2rem; }
+.sub-temp { font-size: 0.7rem; color: #747d8c; }
 .text-temp { font-weight: bold; color: #ff4757; }
 .text-rain { font-weight: bold; color: #1e90ff; }
