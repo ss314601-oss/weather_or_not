@@ -8,79 +8,73 @@
 body {
     background: #f1f2f6;
     color: #2f3542;
-    padding: 15px;
+    padding: 10px;
     display: flex;
     justify-content: center;
 }
 
 .app-container {
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
 h1 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     text-align: center;
     margin-bottom: 5px;
 }
 
 #location {
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #747d8c;
     margin-bottom: 15px;
 }
 
-button {
+#refresh-btn {
     width: 100%;
-    background: #1e90ff;
+    background: #2f3542;
     color: white;
     border: none;
     padding: 12px;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: bold;
     cursor: pointer;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-button:active {
-    background: #3742fa;
-}
-
-/* 모델 선택기 */
-.model-selector {
-    background: #f8f9fa;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.model-selector h3 {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-    color: #57606f;
-}
-
-.checkbox-group {
+/* 상단 탭 스타일 */
+.tab-container {
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
+    gap: 5px;
+    margin-bottom: 15px;
 }
 
-.checkbox-group label {
+.tab-btn {
+    flex: 1;
+    background: #e4e7eb;
+    color: #57606f;
+    border: none;
+    padding: 10px 0;
+    border-radius: 6px;
     font-size: 0.9rem;
     font-weight: bold;
     cursor: pointer;
+    transition: 0.2s;
 }
 
-/* 테이블 영역 (가로 스크롤 가능) */
-.table-container {
+.tab-btn.active {
+    background: #1e90ff;
+    color: white;
+}
+
+/* 횡스크롤 고정 테이블 디자인 */
+.table-wrapper {
     width: 100%;
     overflow-x: auto;
     border: 1px solid #ced6e0;
@@ -90,34 +84,63 @@ button:active {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* 6개 모델이 깨지지 않게 가로폭 확보 */
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
 }
 
 th, td {
-    padding: 10px 8px;
+    padding: 12px 15px;
     text-align: center;
-    border-bottom: 1px solid #f1f2f6;
+    border-right: 1px solid #e4e7eb;
+    border-bottom: 1px solid #e4e7eb;
+    min-width: 85px; /* 각 시간대 열의 최소 너비 */
 }
 
-th {
+/* 첫 번째 열(모델 이름) 좌측 고정 클래스 */
+.sticky-col {
+    position: sticky;
+    left: 0;
     background: #f1f2f6;
     font-weight: bold;
-    color: #57606f;
-    position: sticky;
-    top: 0;
+    z-index: 2;
+    min-width: 100px;
+    border-right: 2px solid #ced6e0;
 }
 
-tr:hover {
+th.sticky-col {
+    background: #e4e7eb;
+}
+
+tr:hover td {
     background: #f6f8f9;
+}
+
+tr:hover td.sticky-col {
+    background: #e4e7eb;
 }
 
 .empty-msg {
     padding: 40px 0;
     color: #a4b0be;
+    text-align: center;
+    width: 100%;
 }
 
-.temp-text {
-    font-weight: bold;
-    color: #ff4757;
+/* 종합 날씨 이모지 및 텍스트 박스 */
+.summary-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
 }
+.icon-emoji {
+    font-size: 1.2rem;
+}
+.sub-temp {
+    font-size: 0.7rem;
+    color: #747d8c;
+}
+
+/* 데이터별 강조 컬러 */
+.text-temp { font-weight: bold; color: #ff4757; }
+.text-rain { font-weight: bold; color: #1e90ff; }
