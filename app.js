@@ -75,7 +75,7 @@ async function fetchWeather(lat, lon, locationName) {
     locationEl.innerText = `${locationName} 예보 로딩 중...`;
 
     // 💡 과거 탐색 없이, 현재부터 미래 24시간 분량만 깔끔하게 요청합니다.
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation&models=ecmwf_ifs04,gfs_seamless,icon_seamless,jma_seamless,gem_seamless,meteofrance_seamless`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation&models=ecmwf_ifs,gfs_seamless,icon_seamless,jma_seamless,gem_seamless,meteofrance_seamless`;
 
     try {
         const response = await fetch(url);
