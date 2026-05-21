@@ -3,20 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘의 날씨</title>
+    <title>기상모델 비교 예보</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/192">
 </head>
 <body>
     <div class="app-container">
-        <h1>☀️ 매일 날씨</h1>
-        <div class="weather-box">
-            <h2 id="location">서울</h2>
-            <p id="temperature">24°C</p>
-            <p id="description">맑음</p>
+        <h1>📊 기상 모델별 비교 예보</h1>
+        <p id="location">위치 정보를 가져와 주세요.</p>
+        
+        <button id="refresh-btn">📍 현재 위치 예보 불러오기</button>
+
+        <div class="model-selector">
+            <h3>비교할 모델 선택</h3>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="model-ecmwf" checked> 🇪🇺 ECMWF</label>
+                <label><input type="checkbox" id="model-gfs" checked> 🇺🇸 GFS</label>
+                <label><input type="checkbox" id="model-icon" checked> 🇩🇪 ICON</label>
+                <label><input type="checkbox" id="model-ukmo" checked> 🇬🇧 UKMO</label>
+                <label><input type="checkbox" id="model-kim" checked> 🇰🇷 KIM (한국)</label>
+                <label><input type="checkbox" id="model-msm" checked> 🇯🇵 MSM (일본)</label>
+            </div>
         </div>
-        <button id="refresh-btn">업데이트</button>
+
+        <div class="table-container">
+            <table id="weather-table">
+                <thead>
+                    <tr id="table-header">
+                        <th>시간</th>
+                        </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td colspan="7" class="empty-msg">위치 버튼을 누르면 3시간 단위 예보가 표시됩니다.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script src="app.js"></script>
