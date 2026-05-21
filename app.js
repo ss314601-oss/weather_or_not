@@ -17,9 +17,10 @@ function updateLocation(lat, lon, name) {
     fetchForecastData();
 }
 
+// [2] fetchForecastData 내 URL 모델 파라미터 적용
 async function fetchForecastData() {
     const modelParams = models.map(m => m.id).join(',');
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&hourly=temperature_2m,precipitation&models=${modelParams}&forecast_days=7`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${currentLat}&longitude=${currentLon}&hourly=temperature_2m,precipitation&models=${modelParams}&forecast_days=7&timezone=auto`;
     const res = await fetch(url);
     const data = await res.json();
     renderForecast(data);
