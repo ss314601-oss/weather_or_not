@@ -1,22 +1,29 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-body { background: #f1f2f6; color: #2f3542; display: flex; justify-content: center; overflow-x: hidden; } /* 흔들림 방지 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f1f2f6; overflow-x: hidden; }
+.app-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-.app-container { width: 100vw; max-width: 800px; background: white; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+.header-section { background: white; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+#map { width: 100%; height: 120px; border-radius: 8px; margin-bottom: 5px; }
+.search-box { display: flex; gap: 5px; margin-bottom: 5px; }
+#search-input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
 
-/* 상단 고정 및 지도 높이 축소 */
-.header-section { position: sticky; top: 0; background: white; padding: 10px; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-#map { width: 100%; height: 120px; border-radius: 8px; margin-bottom: 8px; }
+.main-tabs { display: flex; background: #fff; border-bottom: 1px solid #ccc; }
+.main-tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; color: #aaa; }
+.main-tab-btn.active { color: #1e90ff; border-bottom: 2px solid #1e90ff; }
 
-/* 탭 고정 */
-.main-tabs { position: sticky; top: 180px; background: white; z-index: 998; border-bottom: 1px solid #ced6e0; display: flex; }
+.content-section { display: none; padding: 10px; flex: 1; overflow: hidden; }
+.content-section.active { display: flex; flex-direction: column; }
+.table-wrapper { flex: 1; overflow: auto; border: 1px solid #ccc; background: white; }
 
-/* 표 고정 (Sticky Header & First Column) */
-.table-wrapper { width: 100%; overflow: auto; max-height: calc(100vh - 250px); }
-table { border-collapse: separate; border-spacing: 0; }
-thead th { position: sticky; top: 0; background: #e4e7eb; z-index: 10; }
-.sticky-col { position: sticky; left: 0; background: #f1f2f6; z-index: 5; border-right: 2px solid #ced6e0; }
-thead .sticky-col { z-index: 11; }
+table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.8rem; }
+th, td { padding: 10px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; text-align: center; }
+thead th { position: sticky; top: 0; background: #eee; z-index: 10; }
+.sticky-col { position: sticky; left: 0; background: #fff; z-index: 5; border-right: 2px solid #ccc; }
 
-/* 아코디언 스타일 */
-.daily-row .sticky-col { background: #ffffff; }
-.hourly-row .sticky-col { background: #f8f9fa; font-size: 0.75rem; }
+.history-controls { display: flex; gap: 5px; margin-bottom: 10px; }
+#history-date { flex: 1; padding: 8px; }
+
+.daily-row { cursor: pointer; font-weight: bold; background: #f9f9f9; }
+.hourly-row { display: none; background: #fff; font-size: 0.75rem; }
+.hourly-row.show { display: table-row; }
+.target-date-row td { background: #fff8e7; font-weight: bold; }
