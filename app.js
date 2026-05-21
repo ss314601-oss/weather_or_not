@@ -14,7 +14,7 @@ let currentViewType = 'summary';
 
 // 🌍 순수 오리지널 6대 글로벌 모델 (가짜 보정 없음)
 const models = [
-    { id: 'ecmwf_ifs04', name: '🇪🇺 ECMWF' },
+    { id: 'ecmwf_ifs', name: '🇪🇺 ECMWF' },
     { id: 'gfs_seamless', name: '🇺🇸 GFS' },
     { id: 'icon_seamless', name: '🇩🇪 ICON' },
     { id: 'jma_seamless', name: '🇯🇵 JMA' },
