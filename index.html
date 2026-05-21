@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>날씨 비교 앱</title>
+    <title>Sky Weather</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
         <div class="header-section">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="도시 검색 (예: 서울, 파리)">
-                <button id="search-btn">🔍</button>
-                <button id="gps-btn">📍</button>
-            </div>
             <div id="map"></div>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="도시 이름 검색">
+                <button id="search-btn">🔍</button>
+            </div>
             <p id="location-text">위치: 서울</p>
         </div>
 
